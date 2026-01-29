@@ -6,56 +6,43 @@ import { Database } from "@/integrations/supabase/types"; // นำเข้า 
 type ComputerRow = Database['public']['Tables']['computers']['Row'];
 
 export interface ComputerFromDB {
-  id: number;
+  id: string;
+  name: string;
   serial_number: string;
-  device_name: string;
-  model: string;
+  department: string;
   status: string;
-  warranty_expiry: string;
-  notes: string;
+  registration_date: string;
+  warranty_end_date: string;
   created_at: string;
+main
   user_name: string;
+
+  updated_at: string;
+main
 }
-
-const parseThaiDate = (thaiDate: string) => {
-  if (!thaiDate || typeof thaiDate !== 'string') return null;
-  
-  const months: { [key: string]: string } = {
-    "ม.ค.": "01", "ก.พ.": "02", "มี.ค.": "03", "เม.ย.": "04", "พ.ค.": "05", "มิ.ย.": "06",
-    "ก.ค.": "07", "ส.ค.": "08", "ก.ย.": "09", "ต.ค.": "10", "พ.ย.": "11", "ธ.ค.": "12"
-  };
-
-  try {
-    const parts = thaiDate.split("-");
-    if (parts.length !== 3) return null;
-
-    const day = parts[0].padStart(2, "0");
-    const month = months[parts[1]] || "01";
-    
-    // 71 -> 2571 - 543 = 2028
-    const thaiYear = parseInt(parts[2]);
-    const adYear = (thaiYear + 2500) - 543; 
-
-    return `${adYear}-${month}-${day}`;
-  } catch (e) {
-    return null;
-  }
-};
 
 export function useComputers() {
   return useQuery({
     queryKey: ["computers"],
     queryFn: async (): Promise<ComputerFromDB[]> => {
+main
       // ระบุ <any, "computers", any> หรือ <Database> เพื่อให้ TS รู้จัก Table
       const { data, error } = await supabase
         .from("computers") 
         .select("*");
 
+      const { data, error } = await supabase
+        .from("computers")
+        .select("*")
+        .order("name", { ascending: true });
+main
+
       if (error) {
-        console.error("❌ Supabase Error:", error);
+        console.error("Error fetching computers:", error);
         throw error;
       }
 
+main
       if (!data) return [];
 
       // ใช้ item: ComputerRow แทน item: any เพื่อให้มี Auto-complete
@@ -88,3 +75,9 @@ export function useComputers() {
 }
 
 // ตัวอย่างการใช้งานภายใน component
+
+      return data || [];
+    },
+  });
+}
+main
